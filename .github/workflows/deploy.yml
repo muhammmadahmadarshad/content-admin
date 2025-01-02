@@ -1,0 +1,81 @@
+name: Deploy to DigitalOcean
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'  # Use the version of Node.js that your app requires
+
+      # Step 3: Create the .env file
+      - name: Create .env file
+        run: |
+          touch .env  # Create an empty .env file
+          
+          # Add environment variables from GitHub Secrets
+          echo "DATABASE_CLIENT=${{ secrets.DATABASE_CLIENT }}" >> .env
+          echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
+          echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env
+          echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
+          echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> .env
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+          echo "APP_KEYS=${{ secrets.APP_KEYS }}" >> .env
+          echo "ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}" >> .env
+          echo "API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}" >> .env
+          echo "TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }}" >> .env
+          
+          # Optionally print out the .env contents (be careful not to leak secrets)
+          cat .env
+
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      # Step 5: Copy the application code and .env file to DigitalOcean using scp
+      - name: Copy files to DigitalOcean
+        run: |
+          # Use scp to copy the code and .env file to the DigitalOcean server
+          scp -i ${{ secrets.SSH_PRIVATE_KEY }} -o StrictHostKeyChecking=no -r . root@${{ secrets.DO_HOST }}:/root/software-finder
+          scp -i ${{ secrets.SSH_PRIVATE_KEY }} -o StrictHostKeyChecking=no .env root@${{ secrets.DO_HOST }}:/root/software-finder/.env
+
+      # Step 6: SSH into the DigitalOcean server and deploy
+      - name: Deploy to DigitalOcean via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.DO_HOST }}  # Your DigitalOcean droplet's IP address
+          username: root  # SSH username (root)
+          key: ${{ secrets.SSH_PRIVATE_KEY }}  # Private SSH key for authentication
+          script: |
+            # Navigate to the app directory on the server
+            cd /root/software-finder || exit
+
+            # Pull the latest changes from GitHub repository (if needed)
+            git pull origin main  # Adjust the branch if needed
+
+            # Install any new dependencies
+            yarn install
+
+            # Ensure the .env file is in place (optional but recommended)
+            ls -la .env
+
+            # Build the Strapi app (optional)
+            yarn build
+
+            # Ensure Docker is up to date with any changes
+            docker-compose down  # Stop running containers
+            docker-compose up -d  # Restart containers in detached mode
+
+            # Optionally, restart the services if needed
+            docker-compose restart
