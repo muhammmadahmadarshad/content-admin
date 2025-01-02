@@ -50,12 +50,16 @@ jobs:
           echo "POSTGRES_PASSWORD=$DATABASE_PASSWORD" >> .env
           echo "POSTGRES_DB=$DATABASE_NAME" >> .env
 
-      # Step 5: Copy files to DigitalOcean using SCP with Password
-      
+      # Step 4: Copy files to DigitalOcean
       - name: Copy files to DigitalOcean
         run: |
           sshpass -p "$DO_PASSWORD" scp -o StrictHostKeyChecking=no -r . $DO_USERNAME@$DO_HOST:~/software-finder
           sshpass -p "$DO_PASSWORD" scp -o StrictHostKeyChecking=no .env $DO_USERNAME@$DO_HOST:~/software-finder/.env
+
+      # Step 5: Delete local .env file
+      - name: Delete local .env file
+        run: |
+          rm .env
 
       # Step 6: Deploy to DigitalOcean via SSH
       - name: Deploy to DigitalOcean via SSH
