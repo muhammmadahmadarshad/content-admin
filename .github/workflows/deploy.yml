@@ -58,13 +58,11 @@ jobs:
           sshpass -p "$DO_PASSWORD" scp -o StrictHostKeyChecking=no .env $DO_USERNAME@$DO_HOST:~/software-finder/.env
 
       # Step 6: Deploy to DigitalOcean via SSH
-      - name: Deploy to DigitalOcean via Password
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: $DO_HOST
-          username: $DO_USERNAME
-          password: $DO_PASSWORD
-          script: |
+      - name: Deploy to DigitalOcean via SSH
+        run: |
+          # Use sshpass for password-based SSH authentication
+          sshpass -p "$DO_PASSWORD" ssh -o StrictHostKeyChecking=no $DO_USERNAME@$DO_HOST << 'EOF'
             cd software-finder || exit 1
             docker-compose down
             docker-compose up -d
+          EOF
