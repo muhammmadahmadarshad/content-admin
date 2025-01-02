@@ -10,6 +10,7 @@ jobs:
     env:
       DO_HOST: ${{ vars.DO_HOST }}
       DO_USERNAME: ${{ vars.DO_USERNAME }}
+      DO_PASSWORD: ${{ vars.DO_PASSWORD }}
       DATABASE_CLIENT: ${{ vars.DATABASE_CLIENT }}
       DATABASE_HOST: ${{ vars.DATABASE_HOST }}
       DATABASE_PORT: ${{ vars.DATABASE_PORT }}
@@ -46,33 +47,24 @@ jobs:
           echo "API_TOKEN_SALT=$API_TOKEN_SALT" >> .env
           echo "TRANSFER_TOKEN_SALT=$TRANSFER_TOKEN_SALT" >> .env
 
-      # Step 4: Debug SSH Key
-      - name: Debug SSH Key
-        run: |
-          echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key
-          cat /tmp/ssh_key
-          chmod 600 /tmp/ssh_key
-          ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@$DO_HOST echo "SSH connection successful"
-
-      # Step 5: Copy files to DigitalOcean
+      # Step 4: Copy files to DigitalOcean using SCP with Password
       - name: Copy files to DigitalOcean
         run: |
-          echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key
-          chmod 600 /tmp/ssh_key
-          scp -i /tmp/ssh_key -o StrictHostKeyChecking=no -r . root@$DO_HOST:/software-finder || exit 1
-          scp -i /tmp/ssh_key -o StrictHostKeyChecking=no .env root@$DO_HOST:/software-finder/.env || exit 1
+          sshpass -p "$DO_PASSWORD" scp -o StrictHostKeyChecking=no -r . $DO_USERNAME@$DO_HOST:/software-finder
+          sshpass -p "$DO_PASSWORD" scp -o StrictHostKeyChecking=no .env $DO_USERNAME@$DO_HOST:/software-finder/.env
 
-      # Step 6: Deploy to DigitalOcean
-      - name: Deploy to DigitalOcean via SSH
+      # Step 5: Deploy to DigitalOcean via SSH
+      - name: Deploy to DigitalOcean via Password
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: $DO_HOST
           username: $DO_USERNAME
-          key: $SSH_PRIVATE_KEY
+          password: $DO_PASSWORD
           script: |
-            cd /software-finder || exit
+            cd /software-finder || exit 1
             git pull origin main
             yarn install
             yarn build
             docker-compose down
             docker-compose up -d
+s
