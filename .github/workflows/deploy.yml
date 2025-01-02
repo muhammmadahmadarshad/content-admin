@@ -48,18 +48,17 @@ jobs:
           echo "API_TOKEN_SALT=$API_TOKEN_SALT" >> .env
           echo "TRANSFER_TOKEN_SALT=$TRANSFER_TOKEN_SALT" >> .env
           
-          # Optionally print out the .env contents (be careful not to leak secrets)
-          cat .env
 
       # Step 4: Copy files to DigitalOcean server using SCP
       - name: Copy files to DigitalOcean
         run: |
           echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key  # Store the SSH private key in a temporary file
           chmod 600 /tmp/ssh_key  # Set the correct permissions for the key
+          cat /tmp/ssh_key
 
           # Use SCP to copy the code and .env file to the server
-          scp -i /tmp/ssh_key -o StrictHostKeyChecking=no -r . root@$DO_HOST:/root/software-finder
-          scp -i /tmp/ssh_key -o StrictHostKeyChecking=no .env root@$DO_HOST:/root/software-finder/.env
+          scp -i /tmp/ssh_key -o StrictHostKeyChecking=no -r . root@$DO_HOST:/software-finder
+          scp -i /tmp/ssh_key -o StrictHostKeyChecking=no .env root@$DO_HOST:/software-finder/.env
 
       # Step 5: SSH into the server and run deployment commands
       - name: Deploy to DigitalOcean via SSH
@@ -69,7 +68,7 @@ jobs:
           username: $DO_USERNAME
           key: $SSH_PRIVATE_KEY
           script: |
-            cd /root/software-finder || exit
+            cd /software-finder || exit
             git pull origin main  # Pull the latest changes (if needed)
             yarn install  # Install dependencies
             yarn build  # Build Strapi app
