@@ -36,6 +36,7 @@ jobs:
       # Step 3: Create .env file
       - name: Create .env file
         run: |
+          echo "DO_PASSWORD=$DO_PASSWORD" >> .env
           echo "DATABASE_CLIENT=$DATABASE_CLIENT" >> .env
           echo "DATABASE_HOST=$DATABASE_HOST" >> .env
           echo "DATABASE_PORT=$DATABASE_PORT" >> .env
@@ -46,14 +47,21 @@ jobs:
           echo "ADMIN_JWT_SECRET=$ADMIN_JWT_SECRET" >> .env
           echo "API_TOKEN_SALT=$API_TOKEN_SALT" >> .env
           echo "TRANSFER_TOKEN_SALT=$TRANSFER_TOKEN_SALT" >> .env
+          cat .env
 
-      # Step 4: Copy files to DigitalOcean using SCP with Password
+      # Step 4: Install sshpass for password-based SSH
+      - name: Install sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      # Step 5: Copy files to DigitalOcean using SCP with Password
       - name: Copy files to DigitalOcean
         run: |
           sshpass -p "$DO_PASSWORD" scp -o StrictHostKeyChecking=no -r . $DO_USERNAME@$DO_HOST:/software-finder
           sshpass -p "$DO_PASSWORD" scp -o StrictHostKeyChecking=no .env $DO_USERNAME@$DO_HOST:/software-finder/.env
 
-      # Step 5: Deploy to DigitalOcean via SSH
+      # Step 6: Deploy to DigitalOcean via SSH
       - name: Deploy to DigitalOcean via Password
         uses: appleboy/ssh-action@v0.1.7
         with:
