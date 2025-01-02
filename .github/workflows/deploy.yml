@@ -11,6 +11,9 @@ jobs:
       DO_HOST: ${{ vars.DO_HOST }}
       DO_USERNAME: ${{ vars.DO_USERNAME }}
       DO_PASSWORD: ${{ vars.DO_PASSWORD }}
+      POSTGRES_USER: ${{ vars.DATABASE_USERNAME }}
+      POSTGRES_PASSWORD: ${{ vars.DATABASE_PASSWORD }}
+      POSTGRES_DB: ${{ vars.DATABASE_NAME }}
       DATABASE_CLIENT: ${{ vars.DATABASE_CLIENT }}
       DATABASE_HOST: ${{ vars.DATABASE_HOST }}
       DATABASE_PORT: ${{ vars.DATABASE_PORT }}
@@ -36,7 +39,6 @@ jobs:
       # Step 3: Create .env file
       - name: Create .env file
         run: |
-          echo "DO_PASSWORD=$DO_PASSWORD" >> .env
           echo "DATABASE_CLIENT=$DATABASE_CLIENT" >> .env
           echo "DATABASE_HOST=$DATABASE_HOST" >> .env
           echo "DATABASE_PORT=$DATABASE_PORT" >> .env
@@ -49,16 +51,11 @@ jobs:
           echo "TRANSFER_TOKEN_SALT=$TRANSFER_TOKEN_SALT" >> .env
           cat .env
 
-      # Step 4: Install sshpass for password-based SSH
-      - name: Install sshpass
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sshpass
-
       # Step 5: Copy files to DigitalOcean using SCP with Password
-      # sshpass -p "$DO_PASSWORD" scp -o StrictHostKeyChecking=no -r . $DO_USERNAME@$DO_HOST:~/software-finder
+      
       - name: Copy files to DigitalOcean
         run: |
+          sshpass -p "$DO_PASSWORD" scp -o StrictHostKeyChecking=no -r . $DO_USERNAME@$DO_HOST:~/software-finder
           sshpass -p "$DO_PASSWORD" scp -o StrictHostKeyChecking=no .env $DO_USERNAME@$DO_HOST:~/software-finder/.env
 
       # Step 6: Deploy to DigitalOcean via SSH
@@ -70,7 +67,6 @@ jobs:
           password: $DO_PASSWORD
           script: |
             cd /software-finder || exit 1
-            git pull origin main
             yarn install
             yarn build
             docker-compose down

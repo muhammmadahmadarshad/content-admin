@@ -10,7 +10,7 @@ services:
       - "1337:1337"
     env_file:
       - .env  # Reference to the .env file
-    command: "yarn develop"
+    command: "yarn start"
     depends_on:
       - postgres
 
