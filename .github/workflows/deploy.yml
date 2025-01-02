@@ -8,7 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}
       DO_HOST: ${{ vars.DO_HOST }}
       DO_USERNAME: ${{ vars.DO_USERNAME }}
       DATABASE_CLIENT: ${{ vars.DATABASE_CLIENT }}
@@ -51,6 +50,7 @@ jobs:
       - name: Debug SSH Key
         run: |
           echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key
+          cat /tmp/ssh_key
           chmod 600 /tmp/ssh_key
           ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@$DO_HOST echo "SSH connection successful"
 
