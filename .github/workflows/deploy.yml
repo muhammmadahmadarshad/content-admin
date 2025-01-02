@@ -11,9 +11,6 @@ jobs:
       DO_HOST: ${{ vars.DO_HOST }}
       DO_USERNAME: ${{ vars.DO_USERNAME }}
       DO_PASSWORD: ${{ vars.DO_PASSWORD }}
-      POSTGRES_USER: ${{ vars.DATABASE_USERNAME }}
-      POSTGRES_PASSWORD: ${{ vars.DATABASE_PASSWORD }}
-      POSTGRES_DB: ${{ vars.DATABASE_NAME }}
       DATABASE_CLIENT: ${{ vars.DATABASE_CLIENT }}
       DATABASE_HOST: ${{ vars.DATABASE_HOST }}
       DATABASE_PORT: ${{ vars.DATABASE_PORT }}
@@ -49,7 +46,9 @@ jobs:
           echo "ADMIN_JWT_SECRET=$ADMIN_JWT_SECRET" >> .env
           echo "API_TOKEN_SALT=$API_TOKEN_SALT" >> .env
           echo "TRANSFER_TOKEN_SALT=$TRANSFER_TOKEN_SALT" >> .env
-          cat .env
+          echo "POSTGRES_USER=$DATABASE_USERNAME" >> .env
+          echo "POSTGRES_PASSWORD=$DATABASE_PASSWORD" >> .env
+          echo "POSTGRES_DB=$DATABASE_NAME" >> .env
 
       # Step 5: Copy files to DigitalOcean using SCP with Password
       
@@ -66,8 +65,6 @@ jobs:
           username: $DO_USERNAME
           password: $DO_PASSWORD
           script: |
-            cd /software-finder || exit 1
-            yarn install
-            yarn build
+            cd software-finder || exit 1
             docker-compose down
             docker-compose up -d

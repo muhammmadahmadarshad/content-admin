@@ -4,13 +4,13 @@ services:
     container_name: strapi
     working_dir: /srv/app
     volumes:
-      - ./:/srv/app  # Correct path to content-admin directory
-      - /srv/app/node_modules  
+      - ./:/srv/app  # Mount the project directory inside the container
+      - /srv/app/node_modules  # Local node_modules directory (only inside the container)
     ports:
       - "1337:1337"
     env_file:
       - .env  # Reference to the .env file
-    command: "yarn start"
+    command: sh -c "yarn install && yarn build && yarn start"  # Ensure install and develop are run sequentially
     depends_on:
       - postgres
 
