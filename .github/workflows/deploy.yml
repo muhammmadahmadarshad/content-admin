@@ -8,7 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Here we pass GitHub Secrets as environment variables
       SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}
       DO_HOST: ${{ vars.DO_HOST }}
       DO_USERNAME: ${{ vars.DO_USERNAME }}
@@ -32,9 +31,9 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18'  # Use the version of Node.js that your app requires
+          node-version: '18'
 
-      # Step 3: Create .env file using the environment variables (secrets)
+      # Step 3: Create .env file
       - name: Create .env file
         run: |
           echo "DATABASE_CLIENT=$DATABASE_CLIENT" >> .env
@@ -47,26 +46,23 @@ jobs:
           echo "ADMIN_JWT_SECRET=$ADMIN_JWT_SECRET" >> .env
           echo "API_TOKEN_SALT=$API_TOKEN_SALT" >> .env
           echo "TRANSFER_TOKEN_SALT=$TRANSFER_TOKEN_SALT" >> .env
-          
 
-      # Step 4: Copy files to DigitalOcean server using SCP
+      # Step 4: Debug SSH Key
       - name: Debug SSH Key
         run: |
-        echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key
-        chmod 600 /tmp/ssh_key
-        ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@64.227.150.143 echo "SSH connection successful"
+          echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key
+          chmod 600 /tmp/ssh_key
+          ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@$DO_HOST echo "SSH connection successful"
 
+      # Step 5: Copy files to DigitalOcean
       - name: Copy files to DigitalOcean
         run: |
-          echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key  # Store the SSH private key in a temporary file
-          chmod 600 /tmp/ssh_key  # Set the correct permissions for the key
-          cat /tmp/ssh_key
+          echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key
+          chmod 600 /tmp/ssh_key
+          scp -i /tmp/ssh_key -o StrictHostKeyChecking=no -r . root@$DO_HOST:/software-finder || exit 1
+          scp -i /tmp/ssh_key -o StrictHostKeyChecking=no .env root@$DO_HOST:/software-finder/.env || exit 1
 
-          # Use SCP to copy the code and .env file to the server
-          scp -i /tmp/ssh_key -o StrictHostKeyChecking=no -r . root@$DO_HOST:/software-finder
-          scp -i /tmp/ssh_key -o StrictHostKeyChecking=no .env root@$DO_HOST:/software-finder/.env
-
-      # Step 5: SSH into the server and run deployment commands
+      # Step 6: Deploy to DigitalOcean
       - name: Deploy to DigitalOcean via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -75,8 +71,8 @@ jobs:
           key: $SSH_PRIVATE_KEY
           script: |
             cd /software-finder || exit
-            git pull origin main  # Pull the latest changes (if needed)
-            yarn install  # Install dependencies
-            yarn build  # Build Strapi app
-            docker-compose down  # Stop any running containers
-            docker-compose up -d  # Restart containers
+            git pull origin main
+            yarn install
+            yarn build
+            docker-compose down
+            docker-compose up -d
