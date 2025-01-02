@@ -9,19 +9,19 @@ jobs:
 
     env:
       # Here we pass GitHub Secrets as environment variables
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      DO_HOST: ${{ secrets.DO_HOST }}
-      DO_USERNAME: ${{ secrets.DO_USERNAME }}
-      DATABASE_CLIENT: ${{ secrets.DATABASE_CLIENT }}
-      DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
-      DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
-      DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-      DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
-      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-      APP_KEYS: ${{ secrets.APP_KEYS }}
-      ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
-      API_TOKEN_SALT: ${{ secrets.API_TOKEN_SALT }}
-      TRANSFER_TOKEN_SALT: ${{ secrets.TRANSFER_TOKEN_SALT }}
+      SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}
+      DO_HOST: ${{ vars.DO_HOST }}
+      DO_USERNAME: ${{ vars.DO_USERNAME }}
+      DATABASE_CLIENT: ${{ vars.DATABASE_CLIENT }}
+      DATABASE_HOST: ${{ vars.DATABASE_HOST }}
+      DATABASE_PORT: ${{ vars.DATABASE_PORT }}
+      DATABASE_NAME: ${{ vars.DATABASE_NAME }}
+      DATABASE_USERNAME: ${{ vars.DATABASE_USERNAME }}
+      DATABASE_PASSWORD: ${{ vars.DATABASE_PASSWORD }}
+      APP_KEYS: ${{ vars.APP_KEYS }}
+      ADMIN_JWT_SECRET: ${{ vars.ADMIN_JWT_SECRET }}
+      API_TOKEN_SALT: ${{ vars.API_TOKEN_SALT }}
+      TRANSFER_TOKEN_SALT: ${{ vars.TRANSFER_TOKEN_SALT }}
 
     steps:
       # Step 1: Checkout code from the repository
