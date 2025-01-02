@@ -1,0 +1,41 @@
+services:
+  strapi:
+    image: node:18-alpine # Using Node.js 18.x for compatibility
+    container_name: strapi
+    working_dir: /srv/app
+    volumes:
+      - ./:/srv/app  # Correct path to content-admin directory
+      - /srv/app/node_modules  
+    ports:
+      - "1337:1337"
+    environment:
+      NODE_ENV: development
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: strapi
+      DATABASE_USERNAME: strapi_user
+      DATABASE_PASSWORD: strapi_password
+      DATABASE_SSL: "false"
+      APP_KEYS: fxByAJe+P+LcqLd0mrSs7w==,D5NoWGfpjHtgKPdMw46ZKA==,ZUPQFzzrI761+v1lPk3k+g==,E9YMyEWkwd1eHdGzEH9XJw==
+      API_TOKEN_SALT: PWyV27sEDpK2f5Q3GvMxjA==
+      ADMIN_JWT_SECRET: 2fuRsnx9FbMhQjCJFvoY6g==
+      TRANSFER_TOKEN_SALT: PQrTeRY99wWpfC0D+sOg9A==
+    command: "yarn develop"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: strapi_user
+      POSTGRES_PASSWORD: strapi_password
+      POSTGRES_DB: strapi
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
