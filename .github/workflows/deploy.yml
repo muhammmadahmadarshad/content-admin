@@ -50,6 +50,12 @@ jobs:
           
 
       # Step 4: Copy files to DigitalOcean server using SCP
+      - name: Debug SSH Key
+        run: |
+        echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key
+        chmod 600 /tmp/ssh_key
+        ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@64.227.150.143 echo "SSH connection successful"
+
       - name: Copy files to DigitalOcean
         run: |
           echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key  # Store the SSH private key in a temporary file
