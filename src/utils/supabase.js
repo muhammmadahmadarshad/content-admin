@@ -15,8 +15,8 @@ const subscribeToChanges = (strapi) => {
     getSupbase()
       .channel('leads')  // Subscribe to the 'leads' table
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' },async (payload) => {
-        if(!payload.new.strapi_id){
-            const {title, description, created_at, updated_at, id} =payload.new;
+        const {title, description, created_at, updated_at, id, strapi_id} =payload.new;
+        if(!strapi_id){
         const entry = await strapi.db.query('api::lead.lead').create( {
                 data: {
                   title,
@@ -33,6 +33,11 @@ const subscribeToChanges = (strapi) => {
               .eq('id',id )
 
               revalidateStaticSite()
+        }
+        else {
+          await knex("leads").where({id: strapi_id}).update({
+            supabase_id: id
+        })
         }
 
        
