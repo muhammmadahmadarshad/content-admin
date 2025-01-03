@@ -19,8 +19,6 @@ module.exports = {
    * run jobs, or perform some special logic.
    */
   bootstrap({ strapi }) {
-
-    console.log(strapi.db.query("api::lead.lead"))
   subscribeToChanges(strapi)
 
   },

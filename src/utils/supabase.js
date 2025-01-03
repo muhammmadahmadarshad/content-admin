@@ -7,7 +7,6 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY
 
 
 function getSupbase (){
-    console.log(SUPABASE_KEY, SUPABASE_URL)
     return createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
