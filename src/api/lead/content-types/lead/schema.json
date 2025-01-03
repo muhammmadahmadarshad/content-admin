@@ -4,10 +4,11 @@
   "info": {
     "singularName": "lead",
     "pluralName": "leads",
-    "displayName": "Lead"
+    "displayName": "Lead",
+    "description": ""
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
@@ -16,6 +17,10 @@
     },
     "description": {
       "type": "text"
+    },
+    "supabaseId": {
+      "unique": true,
+      "type": "biginteger"
     }
   }
 }

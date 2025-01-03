@@ -21,6 +21,11 @@ jobs:
       ADMIN_JWT_SECRET: ${{ vars.ADMIN_JWT_SECRET }}
       API_TOKEN_SALT: ${{ vars.API_TOKEN_SALT }}
       TRANSFER_TOKEN_SALT: ${{ vars.TRANSFER_TOKEN_SALT }}
+      STATIC_SITE_PATH: ${{STATIC_SITE_PATH}}
+      SUPABASE_URL: ${{SUPABASE_URL}}
+      SUPABASE_KEY: ${{SUPABASE_KEY}}
+
+
 
     steps:
       # Step 1: Checkout code from the repository
@@ -49,6 +54,9 @@ jobs:
           echo "POSTGRES_USER=$DATABASE_USERNAME" >> .env
           echo "POSTGRES_PASSWORD=$DATABASE_PASSWORD" >> .env
           echo "POSTGRES_DB=$DATABASE_NAME" >> .env
+          echo "STATIC_SITE_PATH=$STATIC_SITE_PATH" >> .env
+          echo "SUPABASE_URL=$SUPABASE_URL" >> .env
+          echo "SUPABASE_KEY=$SUPABASE_KEY" >> .env
 
       # Step 4: Copy files to DigitalOcean
       - name: Copy files to DigitalOcean

@@ -1,19 +1,35 @@
+const { revalidateStaticSite } = require("../../../../utils/revalidate");
+const supabase = require("../../../../utils/supabase");
 
-const revalidateStaticSite = ()=> {
-    const BASE_URL = process.env.STATIC_SITE_PATH
-    fetch(`${BASE_URL}/api/revalidate`, {
-        method: "GET"
-    })
-}
+
 module.exports = {
-    afterCreate() {
+    async afterCreate(event) {
+    
+        const {result} = event
+        if(!result.supabaseId)
+        await supabase.getSupbase().from('leads').insert([{title: result.title, description: result.description, strapi_id: result.id, created_at: result.createdAt, updated_at: result.updatedAt}])
         revalidateStaticSite()
     },
 
-    afterUpdate() {
+   async afterUpdate(event) {
+        revalidateStaticSite()
+        const {result} = event
+        
+        await supabase.getSupbase()
+        .from('leads')
+        .update({
+            title: result.title, 
+            description: result.description,
+            strapi_id: result.strapi_id,
+            created_at: result.createdAt,
+            updated_at: result.updatedAt
+        })
+        .eq('strapi_id',result.id )
         revalidateStaticSite()
     },
-    afterDelete(){
+   async afterDelete(event){
+        const {result} = event
+        await supabase.getSupbase().from('leads').delete().eq('strapi_id', result.id);
         revalidateStaticSite()
     }
   };
